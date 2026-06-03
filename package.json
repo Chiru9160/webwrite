@@ -1,0 +1,24 @@
+{
+  "name": "webwright",
+  "version": "0.1.0",
+  "description": "TypeScript port of Microsoft's Webwright — AI browser agent framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "webwright": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["browser", "automation", "ai", "agent", "playwright", "webwright"],
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.40.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
