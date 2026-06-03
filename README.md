@@ -1,176 +1,147 @@
-# Phase 6 — Workflow Memory
+# Phase 7 — Hierarchical Planner
 
 IMPORTANT
 
-Current benchmark performance is approximately 45%.
-
-The project already has:
+Current architecture already includes:
 
 ✓ Browser Runtime
 ✓ Semantic Snapshot
 ✓ Action Resolver
 ✓ Verifier
 ✓ Agent Loop
-✓ Multi-step execution
+✓ Workflow Memory
 
 Do NOT build:
 
 - Reflection
 - OmniParser
-- Vision systems
-- Multi-agent systems
+- Vision Systems
+- Multi-Agent Systems
 - RL
-- Fine-tuning
-- Hybrid API routing
-- WebWrite planner rewrite
+- Fine-Tuning
+- Hybrid API Routing
 
-The goal of this phase is to learn from successful trajectories.
+This phase focuses exclusively on task decomposition.
 
 --------------------------------------------------
 
 # Objective
 
-Build Workflow Memory.
+Build a hierarchical planner.
 
-The agent should remember:
+Convert:
 
-"How did I solve similar tasks before?"
+Large Goal
 
-and reuse successful procedures.
+↓
+
+Subgoals
+
+↓
+
+Actions
+
+Instead of:
+
+Goal
+
+↓
+
+Direct Action
 
 --------------------------------------------------
 
-# Core Concept
+# Example
 
-Convert successful trajectories into reusable workflows.
+Input:
 
-Example:
+Create a GitLab issue titled "Bug Report"
 
-Task:
-Create GitLab Issue
+Output:
 
-Trajectory:
-
-1. Open Issues
-2. Click New Issue
-3. Fill Title
-4. Submit
-5. Verify
-
-Store as:
-
-Workflow:
-gitlab_create_issue
+[
+  "Open issues page",
+  "Create new issue",
+  "Fill issue title",
+  "Submit issue",
+  "Verify issue exists"
+]
 
 --------------------------------------------------
 
 # Create
 
-workflow.ts
-
-memory.ts
+planner.ts
 
 Keep implementation simple.
 
-No vector database.
+No framework.
 
-No embeddings.
+No planners inside planners.
 
-No external memory systems.
-
-Use JSON files initially.
+No task graphs yet.
 
 --------------------------------------------------
 
-# Workflow Structure
+# Planner Output
 
-interface Workflow {
+interface Subgoal {
 
   id: string;
 
-  taskType: string;
-
   description: string;
 
-  steps: WorkflowStep[];
-
-  successRate: number;
-
-  usageCount: number;
+  successCriteria: string;
 }
 
 --------------------------------------------------
 
-# Workflow Extraction
-
-When task succeeds:
-
-Store:
+# Planning Flow
 
 Goal
 
-Action sequence
+↓
 
-Verification outcome
+Planner
 
-Task metadata
+↓
 
-Example:
+Subgoals
 
-{
-  "goal": "create issue",
-  "steps": [...]
-}
+↓
+
+Executor
+
+↓
+
+Verifier
+
+↓
+
+Next Subgoal
 
 --------------------------------------------------
 
-# Retrieval
-
-Before planning:
+# Prompt Inputs
 
 Goal
-↓
-Workflow Search
-↓
-Relevant Workflows
-↓
-Inject Into Prompt
+
+Current Snapshot
+
+Workflow Memory Results
+
+Action History
 
 --------------------------------------------------
 
-# Retrieval Strategy
+# Prompt Rules
 
-Initially:
+Planner must:
 
-Keyword matching
-
-Task type matching
-
-Domain matching
-
-No embeddings.
-
-No semantic search.
-
-Keep simple.
-
---------------------------------------------------
-
-# Prompt Augmentation
-
-Current:
-
-Goal
-+
-Snapshot
-
-Future:
-
-Goal
-+
-Snapshot
-+
-Relevant Workflows
+- Create 3-10 subgoals
+- Keep subgoals atomic
+- Include success criteria
+- Output JSON only
 
 --------------------------------------------------
 
@@ -180,15 +151,43 @@ Goal:
 
 Create issue
 
-Retrieved Workflow:
+Output:
 
-1. Open Issues
-2. Click New Issue
-3. Fill Title
-4. Submit
-5. Verify
+[
+  {
+    "description":
+      "Navigate to Issues page",
 
-Agent may reuse workflow.
+    "successCriteria":
+      "Issues page visible"
+  },
+
+  {
+    "description":
+      "Open New Issue form",
+
+    "successCriteria":
+      "Issue form visible"
+  }
+]
+
+--------------------------------------------------
+
+# Execution
+
+Only one active subgoal at a time.
+
+When verifier confirms:
+
+Subgoal complete
+
+↓
+
+Advance
+
+Otherwise:
+
+Remain on current subgoal.
 
 --------------------------------------------------
 
@@ -196,39 +195,25 @@ Agent may reuse workflow.
 
 Track:
 
-workflow_retrieval_rate
+planner_success_rate
 
-workflow_usage_rate
+subgoal_completion_rate
 
-workflow_success_rate
+average_subgoals_per_task
 
-benchmark_improvement
-
---------------------------------------------------
-
-# Testing
-
-Create tests proving:
-
-Workflow saved
-
-Workflow loaded
-
-Workflow retrieved
-
-Workflow injected
-
-Workflow improves planning
+average_steps_per_subgoal
 
 --------------------------------------------------
 
-# Benchmark Evaluation
+# Benchmarking
 
-Run benchmark:
+Compare:
 
-Before Memory
+Workflow Memory Only
 
-After Memory
+vs
+
+Workflow Memory + Planner
 
 Measure:
 
@@ -238,29 +223,21 @@ Average Steps
 
 Average LLM Calls
 
-Average Completion Time
+Task Completion
 
 --------------------------------------------------
 
 # Constraints
 
-No vector database
-
-No Pinecone
-
-No Weaviate
-
-No embeddings
-
 No reflection
+
+No vision
+
+No multi-agent
 
 No RL
 
 No fine-tuning
-
-No OmniParser
-
-No vision
 
 Keep implementation lightweight.
 
@@ -270,25 +247,25 @@ Laptop-friendly.
 
 # Success Criteria
 
-Agent can:
+The agent can:
 
-1. Solve task
-2. Store successful trajectory
-3. Retrieve similar trajectory later
-4. Reuse workflow
-5. Improve benchmark performance
+1. Decompose goals
+2. Execute subgoals
+3. Verify subgoals
+4. Progress through tasks
 
 Target:
 
-45%
+55%
 ↓
-50-55%+
+
+60%+
 
 --------------------------------------------------
 
 # Deliverables
 
-phase6-report.md
+phase7-report.md
 
 Include:
 
@@ -296,15 +273,13 @@ Files Added
 
 Lines Added
 
-Workflows Stored
+Planner Success Rate
 
-Retrieval Accuracy
+Subgoal Completion Rate
 
 Benchmark Before
 
 Benchmark After
-
-Success Rate Change
 
 Failure Analysis
 
